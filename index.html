@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="nl-BE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belgian Workplace Calendar 2026–2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --text:#1a1a18;--muted:#6b6b66;--faint:#9e9e99;
+  --border:rgba(0,0,0,0.10);--border-mid:rgba(0,0,0,0.18);
+  --bg:#ffffff;--bg-soft:#f6f5f2;--bg-page:#e8e7e3;
+  --blue-bg:#ddeeff;--blue-tx:#0c447c;--blue-bd:#7ab3e0;
+  --red-bg:#fde8e8;--red-tx:#7a1515;--red-bd:#e09090;
+  --lav-bg:#f0ecff;--lav-tx:#4a3580;--lav-bd:#c4b5f4;
+  --amb-bg:#fff4d6;--amb-tx:#7a5f00;--amb-bd:#e8c040;
+  --wknd:#b0302a;
+  --serif:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg-page);color:var(--text);padding:1.5rem}
+
+/* ── PANEL ── */
+.panel{width:210mm;margin:0 auto 1.2rem;background:var(--bg);border:0.5px solid var(--border-mid);border-radius:8px;padding:12px 16px 10px;box-shadow:0 1px 8px rgba(0,0,0,0.08)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.panel-title{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--faint)}
+.hd-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 11px;border-radius:5px;border:0.5px solid var(--border-mid);background:var(--bg-soft);color:var(--text);cursor:pointer;font-family:var(--sans);white-space:nowrap}
+.hd-btn:hover{background:#e8e7e3}
+.hd-btn-print{background:var(--text);color:var(--bg);border-color:var(--text)}
+.hd-btn-print:hover{opacity:.85;background:var(--text)}
+.hd-btn-gh{background:#f0f6ff;border-color:#7ab3e0;color:var(--blue-tx)}
+.hd-btn-gh:hover{background:#ddeeff}
+.hd-btn-sm{padding:4px 8px;color:var(--faint)}
+.import-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);font-family:var(--sans);font-size:12px;padding:9px 18px;border-radius:20px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:99999;white-space:nowrap}
+.import-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.panel-body{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.mode-grp{display:flex;gap:1px;background:var(--bg-soft);border-radius:5px;padding:2px}
+.mode-btn{font-size:10px;padding:4px 9px;border-radius:4px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);white-space:nowrap}
+.mode-btn.on{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.12)}
+.date-grp{display:flex;align-items:center;gap:4px}
+.date-grp label{font-size:10px;color:var(--faint)}
+.din{font-size:11px;padding:4px 6px;border:0.5px solid var(--border-mid);border-radius:4px;font-family:var(--sans);color:var(--text);background:var(--bg)}
+.cat-grp{display:flex;gap:3px}
+.cat-btn{font-size:9px;font-weight:500;padding:3px 8px;border-radius:20px;border:1.5px solid;cursor:pointer;font-family:var(--sans);opacity:.45;transition:opacity .1s}
+.cat-btn.on{opacity:1}
+.cat-btn.cc-pto    {background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-tx)}
+.cat-btn.cc-conf   {background:var(--amb-bg);border-color:var(--amb-bd);color:var(--amb-tx)}
+.cat-btn.cc-embargo{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
+.cat-btn.cc-closed {background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-tx)}
+.lbl-in{font-size:11px;padding:4px 8px;border:0.5px solid var(--border-mid);border-radius:4px;width:110px;font-family:var(--sans);color:var(--text);background:var(--bg)}
+.lbl-in::placeholder{color:var(--faint)}
+.add-btn{font-size:11px;padding:4px 14px;border-radius:5px;border:none;background:var(--text);color:var(--bg);cursor:pointer;font-family:var(--sans);font-weight:500}
+.add-btn:hover{opacity:.85}
+.entries-list{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px;padding-top:7px;border-top:0.5px solid var(--border);min-height:18px}
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 6px 2px 7px;border-radius:20px;border:1px solid}
+.chip.cc-pto    {background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-tx)}
+.chip.cc-conf   {background:var(--amb-bg);border-color:var(--amb-bd);color:var(--amb-tx)}
+.chip.cc-embargo{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
+.chip.cc-closed {background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-tx)}
+.chip.cc-oncall {background:var(--lav-bg);border-color:var(--lav-bd);color:var(--lav-tx)}
+.del-btn{cursor:pointer;font-size:11px;line-height:1;border:none;background:transparent;padding:0 1px;color:inherit;opacity:.55}
+.del-btn:hover{opacity:1}
+
+/* ── PAGE ── */
+.page{background:var(--bg);width:210mm;min-height:297mm;margin:0 auto 1.5rem;padding:13mm 14mm 11mm;box-shadow:0 2px 24px rgba(0,0,0,0.12);display:flex;flex-direction:column}
+.page-hdr{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:7px;border-bottom:1.5px solid var(--text);margin-bottom:9px}
+.page-title{font-family:var(--serif);font-size:20px;letter-spacing:-0.2px}
+.page-sub{font-size:10px;color:var(--muted);font-weight:300;letter-spacing:.9px;text-transform:uppercase}
+
+/* ── COUNTER BAR ── */
+.cbar{display:grid;grid-template-columns:1fr 1px 1fr;margin-bottom:10px;border:0.5px solid var(--border-mid);border-radius:5px;overflow:hidden}
+.cbar-half{padding:6px 10px 8px}
+.cbar-div{background:var(--border-mid)}
+.cbar-yr{font-size:7.5px;font-weight:500;text-transform:uppercase;letter-spacing:.7px;color:var(--faint);margin-bottom:6px}
+.cbar-row{display:flex;gap:0}
+.cbar-sec{display:flex;gap:10px;padding-right:12px;margin-right:12px;border-right:0.5px solid var(--border)}
+.cbar-sec:last-child{border-right:none;padding-right:0;margin-right:0}
+.cc{display:flex;flex-direction:column;gap:2px;min-width:42px}
+.cc-lbl{font-size:7px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);white-space:nowrap}
+.cc-val{font-size:16px;font-weight:500;line-height:1}
+.v-blue{color:var(--blue-tx)}.v-free{color:#185030}.v-conf{color:var(--amb-tx)}.v-muted{color:var(--faint);font-size:14px}
+.cc-eq{font-size:13px;color:var(--faint);align-self:flex-end;padding-bottom:1px;margin:0 2px}
+
+/* ── MONTH GRID ── */
+.months-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px 11px;flex:1}
+.month-block{border:0.5px solid var(--border-mid);border-radius:5px;overflow:hidden;display:flex;flex-direction:column}
+.month-name{font-family:var(--serif);font-size:11.5px;padding:5px 9px 4px;background:var(--bg-soft);border-bottom:0.5px solid var(--border-mid)}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:3px 4px 5px;gap:1px;flex:1}
+.dlbl{font-size:7.5px;font-weight:500;color:var(--faint);text-align:center;padding:2px 0 4px}
+.dlbl.we{color:var(--wknd);opacity:.75}
+.dc{position:relative;height:36px;text-align:center;padding-top:3px;border-radius:2px}
+.dc-num{display:inline-block;width:16px;height:16px;line-height:16px;border-radius:50%;font-size:9px;font-weight:400;color:var(--text)}
+.dc.we .dc-num{color:var(--wknd)}
+.dc.today .dc-num{background:var(--text);color:var(--bg);font-weight:500}
+.dc.d-closed{background:var(--blue-bg);border-top:1.5px solid var(--blue-bd)}
+.dc.d-closed .dc-num,.dc.we.d-closed .dc-num{color:var(--blue-tx)}
+.dc.d-conf{background:var(--amb-bg);border-top:1.5px solid var(--amb-bd)}
+.dc.d-conf .dc-num,.dc.we.d-conf .dc-num{color:var(--amb-tx)}
+.dc.d-embargo{background:var(--red-bg);border-top:1.5px solid var(--red-bd)}
+.dc.d-embargo .dc-num,.dc.we.d-embargo .dc-num{color:var(--red-tx)}
+.dc.d-oncall{background:var(--lav-bg)}
+.dc.d-oncall .dc-num,.dc.we.d-oncall .dc-num{color:var(--lav-tx)}
+.dc.in-oncall::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--lav-bd);border-radius:0 0 2px 2px;z-index:1}
+.d-abbr{display:block;font-size:5.5px;letter-spacing:.2px;line-height:1.2;margin-top:1px;font-weight:500}
+.dc.d-closed .d-abbr{color:var(--blue-tx)}
+.dc.d-conf .d-abbr{color:var(--amb-tx)}
+.dc.d-embargo .d-abbr{color:var(--red-tx)}
+.dc::after{content:'';position:absolute;bottom:8px;left:2px;right:2px;height:.4px;background:var(--border)}
+.dc.empty{background:transparent!important;border-top:none!important}
+.dc.empty .dc-num{visibility:hidden}
+.dc.empty::after,.dc.empty::before{display:none}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:8px;padding-top:7px;border-top:0.5px solid var(--border-mid)}
+.leg-g{display:flex;align-items:center;gap:5px}
+.leg-sw{width:10px;height:10px;border-radius:2px;border-top:1.5px solid;flex-shrink:0}
+.leg-sw.blue{background:var(--blue-bg);border-color:var(--blue-bd)}
+.leg-sw.red{background:var(--red-bg);border-color:var(--red-bd)}
+.leg-sw.lav{background:var(--lav-bg);border-color:var(--lav-bd);position:relative;overflow:hidden}
+.leg-sw.lav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--lav-bd)}
+.leg-sw.amb{background:var(--amb-bg);border-color:var(--amb-bd)}
+.leg-lbl{font-size:8px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.leg-item{font-size:7.5px;color:var(--faint)}
+
+/* ── DAY POPUP ── */
+.dc:not(.empty){cursor:pointer}
+.dc:not(.empty):hover{filter:brightness(.94)}
+#dp{position:fixed;z-index:9999;background:var(--bg);border:0.5px solid var(--border-mid);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.18),0 1px 6px rgba(0,0,0,0.08);width:214px;font-family:var(--sans);overflow:hidden}
+#dp.hidden{display:none}
+.dp-hd{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 8px;border-bottom:0.5px solid var(--border)}
+.dp-date{font-size:11px;font-weight:500;color:var(--text)}
+.dp-x{border:none;background:transparent;font-size:18px;color:var(--faint);cursor:pointer;padding:0 2px;line-height:1}
+.dp-x:hover{color:var(--text)}
+.dp-base-info{font-size:9px;padding:6px 12px;border-bottom:0.5px solid var(--border);background:var(--blue-bg);color:var(--blue-tx)}
+.dp-base-info.hidden{display:none}
+.dp-cats{display:flex;flex-wrap:wrap;gap:4px;padding:10px 12px 6px}
+.dp-pill{font-size:9.5px;font-weight:500;padding:4px 10px;border-radius:20px;border:1.5px solid;cursor:pointer;font-family:var(--sans);opacity:.4;transition:opacity .1s,transform .1s}
+.dp-pill.on{opacity:1;transform:scale(1.06)}
+.dp-pill.pp-pto    {background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-tx)}
+.dp-pill.pp-conf   {background:var(--amb-bg);border-color:var(--amb-bd);color:var(--amb-tx)}
+.dp-pill.pp-embargo{background:var(--red-bg);border-color:var(--red-bd);color:var(--red-tx)}
+.dp-pill.pp-oncall {background:var(--lav-bg);border-color:var(--lav-bd);color:var(--lav-tx)}
+.dp-lbl-wrap{padding:4px 12px 8px}
+.dp-lbl-in{width:100%;font-size:11px;padding:5px 8px;border:0.5px solid var(--border-mid);border-radius:5px;font-family:var(--sans);color:var(--text);background:var(--bg)}
+.dp-lbl-in::placeholder{color:var(--faint)}
+.dp-btns{display:flex;gap:6px;padding:0 12px 12px}
+.dp-apply{flex:1;font-size:11px;font-weight:500;padding:6px 0;border-radius:5px;border:none;background:var(--text);color:var(--bg);cursor:pointer;font-family:var(--sans)}
+.dp-apply:hover{opacity:.85}
+.dp-rm{font-size:11px;padding:6px 10px;border-radius:5px;border:0.5px solid var(--border-mid);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans)}
+.dp-rm:hover{background:var(--red-bg);color:var(--red-tx);border-color:var(--red-bd)}
+.dp-rm.hidden{display:none}
+
+/* ── PRINT ── */
+@media print{
+  body{background:white;padding:0}
+  .panel{display:none!important}
+  .page{width:100%;min-height:0;margin:0;padding:12mm 12mm 10mm;box-shadow:none;page-break-after:always}
+  .page:last-child{page-break-after:auto}
+}
+@page{size:A4 portrait;margin:0}
+</style>
+</head>
+<body>
+<div class="panel" id="panel"></div>
+<div id="cal-root"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════════
+// ── Rolling window config ──────────────────────────────────────────
+// To roll forward (e.g. add 2029, drop 2026): change START_YEAR and END_YEAR.
+// Before dropping a year, use ☁ Save or Export to archive your data.
+const START_YEAR  = 2026;
+const END_YEAR    = 2028;
+const PTO_BUDGET  = 45;   // vacation days per year
+const CONF_BUDGET = 10;   // conference days per year
+
+const YEARS = [];
+for(let y = START_YEAR; y <= END_YEAR; y++) YEARS.push(y);
+const MONTHS_LIST = [];
+YEARS.forEach(y => { for (let m = 0; m < 12; m++) MONTHS_LIST.push({y, m}); });
+
+// GitHub sync constants — matches your repo
+const GH_OWNER     = 'holding-globule';
+const GH_REPO      = 'calendar-tools';
+const GH_PATH      = 'calendar-data.json';
+const GH_TOKEN_KEY = 'gh-token-calendar-tools';
+
+const MN  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DL  = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+// ── Jaarkalender — workplace closed days (not user-editable) ───────
+// Keys: 'YYYY-M-D'  (JS 0-based month: Jan=0 … Dec=11)
+const CLOSED_BASE = {
+  // ── 2026 Jan ──────────────────────────────────────────────────
+  '2026-0-1':   {a:'NJ',  n:'Nieuwjaar',                   type:'fd'},   // Thu
+  '2026-0-2':   {a:'BRG', n:'Brugdag (V)',                  type:'brg'},  // Fri
+  // ── 2026 Feb ──────────────────────────────────────────────────
+  '2026-1-2':   {a:'LM',  n:'Lichtmis (BFD)',               type:'bfd'},  // Mon
+  // ── 2026 Apr ──────────────────────────────────────────────────
+  '2026-3-6':   {a:'PM',  n:'Paasmaandag',                  type:'fd'},   // Mon
+  // ── 2026 May ──────────────────────────────────────────────────
+  '2026-4-1':   {a:'DA',  n:'Dag van de Arbeid',            type:'fd'},   // Fri
+  '2026-4-14':  {a:'HV',  n:'O.H. Hemelvaart',              type:'fd'},   // Thu
+  '2026-4-15':  {a:'BRG', n:'Brugdag (recup 01/05)',        type:'brg'},  // Fri
+  '2026-4-25':  {a:'PK',  n:'Pinkstermaandag',              type:'fd'},   // Mon
+  // ── 2026 Jul ──────────────────────────────────────────────────
+  '2026-6-11':  {a:'FVG', n:'Feest Vlaamse Gem. (BFD)',     type:'bfd'},  // Sat — visual
+  '2026-6-20':  {a:'',    n:'Collectief verlof',            type:'v'},    // Mon (FVG recup)
+  '2026-6-21':  {a:'NF',  n:'Nationale Feestdag',           type:'fd'},   // Tue
+  '2026-6-22':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2026-6-23':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2026-6-24':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2026-6-25':  {a:'',    n:'Collectief verlof',            type:'v'},    // Sat — visual
+  '2026-6-26':  {a:'',    n:'Collectief verlof',            type:'v'},    // Sun — visual
+  '2026-6-27':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2026-6-28':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2026-6-29':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2026-6-30':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2026-6-31':  {a:'',    n:'Collectief verlof',            type:'v'},
+  // ── 2026 Aug ──────────────────────────────────────────────────
+  '2026-7-15':  {a:'OLV', n:'O.L.V. Hemelvaart',           type:'fd'},   // Sat — visual; recup=28/12
+  // ── 2026 Sep ──────────────────────────────────────────────────
+  '2026-8-7':   {a:'LK',  n:'LK (BFD)',          type:'bfd'},  // Mon
+  // ── 2026 Nov ──────────────────────────────────────────────────
+  '2026-10-1':  {a:'AH',  n:'Allerheiligen',                type:'fd'},   // Sun — visual; recup=29/12
+  '2026-10-2':  {a:'AZ',  n:'Allerzielen (BFD)',             type:'bfd'},  // Mon
+  '2026-10-11': {a:'WS',  n:'Wapenstilstand',               type:'fd'},   // Wed
+  // ── 2026 Dec ──────────────────────────────────────────────────
+  '2026-11-25': {a:'KM',  n:'Kerstmis',                     type:'fd'},   // Fri
+  '2026-11-28': {a:'',    n:'Wacht (recup OLV)',             type:'v'},    // Mon
+  '2026-11-29': {a:'',    n:'Wacht (recup AH)',              type:'v'},    // Tue
+  '2026-11-30': {a:'',    n:'Wacht (recup 2KD)',             type:'v'},    // Wed
+  '2026-11-31': {a:'',    n:'Wacht (V)',                     type:'v'},    // Thu
+  // ── 2027 Jan ──────────────────────────────────────────────────
+  '2027-0-1':   {a:'NJ',  n:'Nieuwjaar',                    type:'fd'},   // Fri
+  // ── 2027 Feb ──────────────────────────────────────────────────
+  '2027-1-2':   {a:'LM',  n:'Lichtmis (BFD)',               type:'bfd'},  // Tue
+  // ── 2027 Mar ──────────────────────────────────────────────────
+  '2027-2-29':  {a:'PM',  n:'Paasmaandag',                  type:'fd'},   // Mon
+  // ── 2027 May ──────────────────────────────────────────────────
+  '2027-4-1':   {a:'DA',  n:'Dag van de Arbeid',            type:'fd'},   // Sat — visual
+  '2027-4-6':   {a:'HV',  n:'O.H. Hemelvaart',              type:'fd'},   // Thu
+  '2027-4-7':   {a:'BRG', n:'Brugdag (recup 01/05)',        type:'brg'},  // Fri
+  '2027-4-17':  {a:'PK',  n:'Pinkstermaandag',              type:'fd'},   // Mon
+  // ── 2027 Jul ──────────────────────────────────────────────────
+  '2027-6-11':  {a:'FVG', n:'Feest Vlaamse Gem. (BFD)',     type:'bfd'},  // Sun — visual
+  '2027-6-19':  {a:'',    n:'Collectief verlof',            type:'v'},    // Mon (FVG recup)
+  '2027-6-20':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-21':  {a:'NF',  n:'Nationale Feestdag',           type:'fd'},   // Wed
+  '2027-6-22':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-23':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-24':  {a:'',    n:'Collectief verlof',            type:'v'},    // Sat — visual
+  '2027-6-25':  {a:'',    n:'Collectief verlof',            type:'v'},    // Sun — visual
+  '2027-6-26':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-27':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-28':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-29':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-30':  {a:'',    n:'Collectief verlof',            type:'v'},
+  '2027-6-31':  {a:'',    n:'Collectief verlof',            type:'v'},
+  // ── 2027 Aug ──────────────────────────────────────────────────
+  '2027-7-15':  {a:'OLV', n:'O.L.V. Hemelvaart',           type:'fd'},   // Sun — visual; recup=12/11
+  // ── 2027 Sep ──────────────────────────────────────────────────
+  '2027-8-6':   {a:'LK',  n:'LK (BFD)',          type:'bfd'},  // Mon
+  // ── 2027 Nov ──────────────────────────────────────────────────
+  '2027-10-1':  {a:'AH',  n:'Allerheiligen',                type:'fd'},   // Mon
+  '2027-10-2':  {a:'AZ',  n:'Allerzielen (BFD)',             type:'bfd'},  // Tue
+  '2027-10-11': {a:'WS',  n:'Wapenstilstand',               type:'fd'},   // Thu
+  '2027-10-12': {a:'BRG', n:'Brugdag (recup OLV)',          type:'brg'},  // Fri
+  // ── 2027 Dec ──────────────────────────────────────────────────
+  '2027-11-25': {a:'KM',  n:'Kerstmis',                     type:'fd'},   // Sat — visual
+  '2027-11-26': {a:'2KD', n:'Tweede Kerstdag (BFD)',         type:'bfd'},  // Sun — visual
+  '2027-11-27': {a:'',    n:'Wacht (recup KM)',              type:'v'},    // Mon
+  '2027-11-28': {a:'',    n:'Wacht (recup 2KD)',             type:'v'},    // Tue
+  '2027-11-29': {a:'',    n:'Wacht (V)',                     type:'v'},    // Wed
+  '2027-11-30': {a:'',    n:'Wacht (V)',                     type:'v'},    // Thu
+  '2027-11-31': {a:'',    n:'Wacht (V)',                     type:'v'},    // Fri
+
+  // ── 2028 — nationally fixed statutory holidays (FD) only ─────────
+  // Verified via Easter computation (matches official algorithm; cross-checked
+  // against confirmed 2026/2027 dates above — all matched exactly).
+  // BFD (Lichtmis, Leuven Kermis), brugdagen, and collectief verlof are
+  // workplace-specific and await the official 2028 jaarkalender PDF.
+  '2028-0-1':   {a:'NJ',  n:'Nieuwjaar',                     type:'fd'},   // Sat — visual only
+  '2028-3-17':  {a:'PM',  n:'Paasmaandag',                   type:'fd'},   // Mon
+  '2028-4-1':   {a:'DA',  n:'Dag van de Arbeid',             type:'fd'},   // Mon
+  '2028-4-25':  {a:'HV',  n:'O.H. Hemelvaart',               type:'fd'},   // Thu
+  '2028-5-5':   {a:'PK',  n:'Pinkstermaandag',                type:'fd'},   // Mon
+  '2028-6-21':  {a:'NF',  n:'Nationale Feestdag',            type:'fd'},   // Fri
+  '2028-7-15':  {a:'OLV', n:'O.L.V. Hemelvaart',            type:'fd'},   // Tue
+  '2028-10-1':  {a:'AH',  n:'Allerheiligen',                 type:'fd'},   // Wed
+  '2028-10-11': {a:'WS',  n:'Wapenstilstand',                type:'fd'},   // Sat — visual only
+  '2028-11-25': {a:'KM',  n:'Kerstmis',                      type:'fd'},   // Mon
+};
+
+// Pre-loaded conference entries (EAPD Liverpool — 4 weekdays Jun 30–Jul 3 2026)
+const CONF_BASE = {
+  '2026-5-30': {a:'EAPD', n:'EAPD Liverpool'},  // Tue Jun 30
+  '2026-6-1':  {a:'EAPD', n:'EAPD Liverpool'},  // Wed Jul 1
+  '2026-6-2':  {a:'EAPD', n:'EAPD Liverpool'},  // Thu Jul 2
+  '2026-6-3':  {a:'EAPD', n:'EAPD Liverpool'},  // Fri Jul 3
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// USER DATA
+// ═══════════════════════════════════════════════════════════════════
+let UD = {
+  closed:  {},
+  conf:    {},
+  embargo: {},
+  oncall:  {},
+};
+
+const STORAGE_KEY     = 'be-workplace-calendar';
+const STORAGE_KEY_OLD = 'be-workplace-calendar-2026-2027'; // legacy key — migrated on first load
+
+async function saveUD() {
+  const data = JSON.stringify(UD);
+  try { await window.storage.set(STORAGE_KEY, data); } catch(e) {}
+  try { localStorage.setItem(STORAGE_KEY, data); } catch(e) {}
+}
+async function loadUD() {
+  // Try window.storage first (Claude panel), then localStorage (local browser)
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    if(r && r.value) { UD = Object.assign(UD, JSON.parse(r.value)); return; }
+  } catch(e) {}
+  try {
+    let r = localStorage.getItem(STORAGE_KEY);
+    if(!r) {
+      // One-time migration from old key
+      const old = localStorage.getItem(STORAGE_KEY_OLD);
+      if(old) { localStorage.setItem(STORAGE_KEY, old); r = old; }
+    }
+    if(r) UD = Object.assign(UD, JSON.parse(r));
+  } catch(e) {}
+}
+
+function ghToken() {
+  let t = localStorage.getItem(GH_TOKEN_KEY);
+  if(!t) {
+    t = prompt('Paste your GitHub access token (saved only on this device — never uploaded):');
+    if(t) { t = t.trim(); localStorage.setItem(GH_TOKEN_KEY, t); }
+  }
+  return t || null;
+}
+
+function resetGhToken() {
+  if(confirm('Reset the GitHub token stored on this device? You will be asked to paste it again next time you Save or Load.')) {
+    localStorage.removeItem(GH_TOKEN_KEY);
+    showImportToast('GitHub token cleared on this device');
+  }
+}
+
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,(_,p1)=>String.fromCharCode('0x'+p1)));
+}
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+
+async function saveToGitHub() {
+  const btn = document.getElementById('gh-save-btn');
+  const token = ghToken(); if(!token) return;
+  if(btn){ btn.textContent='⏳ Saving…'; btn.disabled=true; }
+  try {
+    const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+    let sha = null;
+    const getRes = await fetch(apiUrl, { headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' } });
+    if(getRes.status===401){ localStorage.removeItem(GH_TOKEN_KEY); alert('GitHub rejected that token. Please try again — you will be asked to paste a fresh one.'); return; }
+    if(getRes.ok){ const j=await getRes.json(); sha=j.sha; }
+    const payload = JSON.stringify({ meta:{ exported:new Date().toISOString(), version:`${START_YEAR}-${END_YEAR}` }, data:UD }, null, 2);
+    const body = { message:`Update calendar data — ${new Date().toLocaleString('en-GB')}`, content:b64EncodeUnicode(payload) };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(apiUrl, { method:'PUT', headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+    if(!putRes.ok){ const e=await putRes.text().catch(()=>''); throw new Error(`PUT failed: ${putRes.status} ${e}`); }
+    showImportToast('Saved to GitHub ✓');
+  } catch(e) {
+    alert('Could not save to GitHub.\n\nDetails: '+(e.message||e));
+  } finally {
+    if(btn){ btn.textContent='☁ Save'; btn.disabled=false; }
+  }
+}
+
+async function loadFromGitHub() {
+  const btn = document.getElementById('gh-load-btn');
+  const token = ghToken(); if(!token) return;
+  if(!confirm('This replaces your current entries with the version saved on GitHub. Continue?')) return;
+  if(btn){ btn.textContent='⏳ Loading…'; btn.disabled=true; }
+  try {
+    const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+    const res = await fetch(apiUrl, { headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' } });
+    if(res.status===401){ localStorage.removeItem(GH_TOKEN_KEY); alert('GitHub rejected that token. Please try again.'); return; }
+    if(res.status===404){ alert('No data saved on GitHub yet. Use ☁ Save first, from any device.'); return; }
+    if(!res.ok) throw new Error('GET failed: '+res.status);
+    const j = await res.json();
+    const text = b64DecodeUnicode(j.content.replace(/\n/g,''));
+    const parsed = JSON.parse(text);
+    const imported = parsed.data || parsed;
+    UD = Object.assign({closed:{},conf:{},embargo:{},oncall:{}}, imported);
+    saveUD(); reRender(); createPopup();
+    showImportToast('Loaded latest from GitHub ✓');
+  } catch(e) {
+    alert('Could not load from GitHub.\n\nDetails: '+(e.message||e));
+  } finally {
+    if(btn){ btn.textContent='☁ Load'; btn.disabled=false; }
+  }
+}
+
+function exportData() {
+  const d = new Date();
+  const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const filename = `claude-calendar-${stamp}.json`;
+  const payload = JSON.stringify({
+    meta: { exported: new Date().toISOString(), version: `${START_YEAR}-${END_YEAR}` },
+    data: UD
+  }, null, 2);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([payload], {type:'application/json'}));
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportPDF() {
+  const btn = document.getElementById('pdf-btn');
+  if(btn){ btn.textContent='⏳ Building…'; btn.disabled=true; }
+
+  const d = new Date();
+  const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const filename = `claude-calendar-${stamp}.pdf`;
+
+  const opt = {
+    margin:    0,
+    filename:  filename,
+    image:     { type:'jpeg', quality:0.98 },
+    html2canvas: {
+      scale:   2,
+      useCORS: true,
+      logging: false,
+      onclone: doc => {
+        doc.body.style.background = 'white';
+        doc.body.style.padding    = '0';
+        doc.getElementById('panel').style.display = 'none';
+        doc.querySelectorAll('.page').forEach(p => {
+          p.style.boxShadow = 'none';
+          p.style.margin    = '0';
+          p.style.width     = '210mm';
+        });
+      }
+    },
+    jsPDF:     { unit:'mm', format:'a4', orientation:'portrait' },
+    pagebreak: { mode:['css','legacy'], before:'.page' }
+  };
+
+  html2pdf().set(opt).from(document.getElementById('cal-root')).save()
+    .then(()=>{ if(btn){ btn.textContent='↓ PDF'; btn.disabled=false; } })
+    .catch(()=>{ if(btn){ btn.textContent='↓ PDF'; btn.disabled=false; } });
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+
+        if (Array.isArray(parsed)) {
+          // ── Conference tracker format: array of conference objects ──
+          importTrackerData(parsed, file.name);
+        } else {
+          // ── Calendar backup format: { meta, data } or bare UD object ──
+          const imported = parsed.data || parsed;
+          UD = Object.assign({closed:{},conf:{},embargo:{},oncall:{}}, imported);
+          saveUD(); reRender(); createPopup();
+          showImportToast(`Loaded: ${file.name}`);
+        }
+      } catch(err) {
+        alert('Could not read file. Make sure it is a valid calendar export or conference tracker export (.json).');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function importTrackerData(entries, filename) {
+  // Remove all previously tracker-sourced conference entries (clean re-sync).
+  // Manually-added conference entries (no src tag) are left untouched.
+  Object.keys(UD.conf).forEach(k => {
+    if (UD.conf[k] && UD.conf[k].src === 'tracker') delete UD.conf[k];
+  });
+
+  let addedDays = 0, addedConfs = 0;
+
+  entries.filter(c => c.confirmed === true && c.s).forEach(c => {
+    const start = parseDin(c.s);
+    const end   = c.e ? parseDin(c.e) : start;
+    if (!start) return;
+    const abbr  = c.name ? c.name.split(' ').map(w=>w[0]).join('').slice(0,4).toUpperCase() : 'CONF';
+    const label = c.city ? `${c.name} · ${c.city}` : c.name;
+    iterDates(start, end, (y,m,d) => {
+      const k = dkey(y,m,d);
+      UD.conf[k] = { a: abbr, n: label, src: 'tracker' };
+      addedDays++;
+    });
+    addedConfs++;
+  });
+
+  saveUD(); reRender(); createPopup();
+  showImportToast(`Synced ${addedConfs} confirmed conference${addedConfs===1?'':'s'} (${addedDays} day${addedDays===1?'':'s'}) from ${filename}`);
+}
+
+function showImportToast(text) {
+  let t = document.getElementById('import-toast');
+  if(!t){ t=document.createElement('div'); t.id='import-toast'; document.body.appendChild(t); }
+  t.textContent = `✓ ${text}`;
+  t.className = 'import-toast show';
+  clearTimeout(t._to);
+  t._to = setTimeout(()=>t.className='import-toast',3400);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+const isWD  = (y,m,d) => { const w=new Date(y,m,d).getDay(); return w!==0&&w!==6; };
+const dkey  = (y,m,d) => `${y}-${m}-${d}`;
+const fmtDt = (y,m,d) => new Date(y,m,d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+
+function parseDin(s) {
+  if(!s) return null;
+  const [y,mm,dd]=s.split('-').map(Number);
+  return {y, m:mm-1, d:dd};
+}
+function toDin(y,m,d){ return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function getWeekMon(y,m,d){
+  const dt=new Date(y,m,d);
+  const dow=dt.getDay(); // 0=Sun,1=Mon...6=Sat
+  const diff=dow===0?-6:1-dow; // shift Sun back 6, others to Monday
+  const mon=new Date(y,m,d+diff);
+  return dkey(mon.getFullYear(),mon.getMonth(),mon.getDate());
+}
+function iterDates(s,e,cb){ const cur=new Date(s.y,s.m,s.d),end=new Date(e.y,e.m,e.d); while(cur<=end){cb(cur.getFullYear(),cur.getMonth(),cur.getDate());cur.setDate(cur.getDate()+1);} }
+function countWD(obj,year){ return Object.keys(obj).filter(k=>{const[y,m,d]=k.split('-').map(Number);return y===year&&isWD(y,m,d);}).length; }
+
+// ═══════════════════════════════════════════════════════════════════
+// COUNTERS
+// ═══════════════════════════════════════════════════════════════════
+function calcCounters(year) {
+  const jk     = countWD(CLOSED_BASE, year);
+  const verlof = countWD(UD.closed,   year);
+  const ptoUsed = jk + verlof;
+  const ptoFree = PTO_BUDGET - ptoUsed;
+
+  // Conference: weekday entries in CONF_BASE + UD.conf, not already covered by a closed day
+  const allConf = {...CONF_BASE, ...UD.conf};
+  const confUsed = Object.keys(allConf).filter(k => {
+    const [y2,m2,d2]=k.split('-').map(Number);
+    return y2===year && isWD(y2,m2,d2) && !CLOSED_BASE[k] && !UD.closed[k];
+  }).length;
+  const confFree = CONF_BUDGET - confUsed;
+
+  return {jk, verlof, ptoUsed, ptoFree, confUsed, confFree};
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COUNTER BAR
+// ═══════════════════════════════════════════════════════════════════
+function buildCbar(year) {
+  const {jk,verlof,ptoUsed,ptoFree,confUsed,confFree} = calcCounters(year);
+  const cc = (l,v,c,s) => `<div class="cc"><span class="cc-lbl">${l}</span><span class="cc-val ${c}">${v}</span>${s?`<span style="font-size:7px;color:var(--faint)">${s}</span>`:''}</div>`;
+
+  const div=document.createElement('div'); div.className=`cbar cbar-y${year}`;
+  div.innerHTML=`
+    <div class="cbar-half">
+      <div class="cbar-yr">${year} · Vacation days (budget: ${PTO_BUDGET})</div>
+      <div class="cbar-row">
+        <div class="cbar-sec">
+          ${cc('Jaarkalender',jk+'d','v-blue')}
+          ${cc('+ Verlof',verlof>0?'+'+verlof+'d':'—',verlof>0?'v-blue':'v-muted')}
+        </div>
+        <div class="cbar-sec">
+          ${cc('= Used',ptoUsed+'d','v-blue')}
+          ${cc('Remaining',ptoFree+'d', ptoFree>=0?'v-free':'v-muted')}
+        </div>
+      </div>
+    </div>
+    <div class="cbar-div"></div>
+    <div class="cbar-half">
+      <div class="cbar-yr">${year} · Conference days (budget: ${CONF_BUDGET})</div>
+      <div class="cbar-row">
+        <div class="cbar-sec">
+          ${cc('Used',confUsed+'d','v-conf')}
+        </div>
+        <div class="cbar-sec">
+          ${cc('Remaining',confFree+'d',confFree>0?'v-free':'v-muted')}
+        </div>
+      </div>
+    </div>`;
+  return div;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BUILD MONTH
+// ═══════════════════════════════════════════════════════════════════
+const todayKey = dkey(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+
+function buildMonth(y,m) {
+  const block=document.createElement('div'); block.className='month-block';
+  const nm=document.createElement('div'); nm.className='month-name'; nm.textContent=`${MN[m]} ${y}`; block.appendChild(nm);
+  const mg=document.createElement('div'); mg.className='month-grid';
+
+  DL.forEach((d,i)=>{ const l=document.createElement('div'); l.className='dlbl'+(i===0||i===6?' we':''); l.textContent=d; mg.appendChild(l); });
+
+  const firstDow=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate();
+  for(let i=0;i<firstDow;i++){ const e=document.createElement('div'); e.className='dc empty'; const n=document.createElement('span'); n.className='dc-num'; e.appendChild(n); mg.appendChild(e); }
+
+  for(let d=1;d<=dim;d++){
+    const dow=new Date(y,m,d).getDay(), isWe=dow===0||dow===6;
+    const k=dkey(y,m,d), monK=getWeekMon(y,m,d);
+    const inOC=!!UD.oncall[monK];
+    const base=CLOSED_BASE[k], uClosed=UD.closed[k], uConf=UD.conf[k]||CONF_BASE[k], uEmb=UD.embargo[k];
+
+    let cls='dc';
+    if(isWe)       cls+=' we';
+    if(k===todayKey) cls+=' today';
+    if(inOC)       cls+=' in-oncall';
+
+    let tag=null;
+    if(uEmb)              { cls+=' d-embargo'; tag=uEmb; }
+    else if(base||uClosed){ cls+=' d-closed';  tag=base||uClosed; }
+    else if(uConf)        { cls+=' d-conf';    tag=uConf; }
+    else if(inOC)         { cls+=' d-oncall'; }
+
+    const cell=document.createElement('div'); cell.className=cls;
+    cell.dataset.key=k;
+    cell.addEventListener('click', e=>{e.stopPropagation(); showPopup(k,cell);});
+    const num=document.createElement('span'); num.className='dc-num'; num.textContent=d; cell.appendChild(num);
+    if(tag&&tag.a){ const ab=document.createElement('span'); ab.className='d-abbr'; ab.textContent=tag.a; cell.appendChild(ab); }
+    mg.appendChild(cell);
+  }
+  block.appendChild(mg); return block;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LEGEND
+// ═══════════════════════════════════════════════════════════════════
+function buildLegend() {
+  const el=document.createElement('div'); el.className='legend';
+  el.innerHTML=`
+    <div class="leg-g"><span class="leg-sw blue"></span><span class="leg-lbl">Closed / Verlof</span><span class="leg-item">· FD · BFD · brugdagen · collectief verlof · personal leave</span></div>
+    <div class="leg-g"><span class="leg-sw amb"></span><span class="leg-lbl">Conference</span><span class="leg-item">· free on closed days</span></div>
+    <div class="leg-g"><span class="leg-sw red"></span><span class="leg-lbl">Embargo</span><span class="leg-item">· mandatory presence</span></div>
+    <div class="leg-g"><span class="leg-sw lav"></span><span class="leg-lbl">On-call week</span></div>`;
+  return el;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ENTRY PANEL
+// ═══════════════════════════════════════════════════════════════════
+let pMode='single', pCat='pto';
+
+function buildPanel() {
+  const panel=document.getElementById('panel'); panel.innerHTML='';
+
+  const hd=document.createElement('div'); hd.className='panel-head';
+  hd.innerHTML=`<span class="panel-title">Add to calendar</span>
+    <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+      <button class="hd-btn" onclick="exportData()" title="Download all entries as JSON">↓ Export</button>
+      <button class="hd-btn" onclick="importData()" title="Load entries from a JSON file">↑ Import</button>
+      <button class="hd-btn hd-btn-gh" id="gh-save-btn" onclick="saveToGitHub()" title="Save all entries to your GitHub repo">☁ Save</button>
+      <button class="hd-btn hd-btn-gh" id="gh-load-btn" onclick="loadFromGitHub()" title="Load latest entries from your GitHub repo">☁ Load</button>
+      <button class="hd-btn hd-btn-sm" onclick="resetGhToken()" title="Reset stored GitHub token on this device">⚙</button>
+      <button class="hd-btn hd-btn-print" id="pdf-btn" onclick="exportPDF()" title="Save calendar as PDF">↓ PDF</button>
+    </div>`;
+  panel.appendChild(hd);
+
+  const body=document.createElement('div'); body.className='panel-body';
+
+  // Category pills first
+  if(pMode!=='oncall') {
+    const cg=document.createElement('div'); cg.className='cat-grp';
+    [{id:'pto',lbl:'PTO'},{id:'conf',lbl:'Conf'},{id:'embargo',lbl:'Embargo'},{id:'closed',lbl:'Closed'}].forEach(({id,lbl})=>{
+      const b=document.createElement('button'); b.className=`cat-btn cc-${id}`+(pCat===id?' on':''); b.textContent=lbl;
+      b.onclick=()=>{ pCat=id; buildPanel(); }; cg.appendChild(b);
+    });
+    body.appendChild(cg);
+  }
+
+  // Mode tabs
+  const mg=document.createElement('div'); mg.className='mode-grp';
+  [{id:'single',lbl:'Single day'},{id:'range',lbl:'Date range'},{id:'oncall',lbl:'On-call week'}].forEach(({id,lbl})=>{
+    const b=document.createElement('button'); b.className='mode-btn'+(pMode===id?' on':''); b.textContent=lbl;
+    b.onclick=()=>{ pMode=id; if(id==='oncall') pCat='oncall'; buildPanel(); }; mg.appendChild(b);
+  });
+  body.appendChild(mg);
+
+  // Date inputs — native date picker with European display via lang="nl-BE"
+  const dg=document.createElement('div'); dg.className='date-grp';
+  const defDate=toDin(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+  const minD=`${START_YEAR}-01-01`, maxD=`${END_YEAR}-12-31`;
+  if(pMode==='oncall') {
+    dg.innerHTML=`<label>Any day in week</label><input class="din" type="date" id="d1" value="${defDate}" min="${minD}" max="${maxD}">`;
+  } else if(pMode==='range') {
+    dg.innerHTML=`<label>From</label><input class="din" type="date" id="d1" value="${defDate}" min="${minD}" max="${maxD}">
+      <label>to</label><input class="din" type="date" id="d2" value="${defDate}" min="${minD}" max="${maxD}">`;
+  } else {
+    dg.innerHTML=`<input class="din" type="date" id="d1" value="${defDate}" min="${minD}" max="${maxD}">`;
+  }
+  body.appendChild(dg);
+
+  // Label + Add
+  const li=document.createElement('input'); li.className='lbl-in'; li.id='entry-label'; li.placeholder='Label (opt.)'; body.appendChild(li);
+  const ab=document.createElement('button'); ab.className='add-btn'; ab.textContent='+ Add'; ab.onclick=doAdd; body.appendChild(ab);
+  panel.appendChild(body);
+
+  // Chips
+  renderChips(panel);
+
+  // Range mode: auto-advance d2 to d1+1 when d1 changes
+  if(pMode==='range') {
+    const d1el=panel.querySelector('#d1'), d2el=panel.querySelector('#d2');
+    if(d1el&&d2el) {
+      d1el.addEventListener('change',()=>{
+        if(!d1el.value) return;
+        const start=parseDin(d1el.value); if(!start) return;
+        const next=new Date(start.y,start.m,start.d+1);
+        const ns=toDin(next.getFullYear(),next.getMonth(),next.getDate());
+        if(ns<=maxD) d2el.value=ns;
+        d2el.min=d1el.value;
+      });
+    }
+  }
+}
+
+function renderChips(panel) {
+  let list=panel.querySelector('.entries-list');
+  if(!list){ list=document.createElement('div'); list.className='entries-list'; panel.appendChild(list); }
+  list.innerHTML='';
+  const all=[];
+  Object.entries(UD.closed).forEach(([k,v])=>all.push({k,v,cat:'pto'}));
+  Object.entries(UD.conf).forEach(([k,v])=>all.push({k,v,cat:'conf'}));
+  Object.entries(UD.embargo).forEach(([k,v])=>all.push({k,v,cat:'embargo'}));
+  Object.entries(UD.oncall).forEach(([k,v])=>all.push({k,v,cat:'oncall'}));
+  all.sort((a,b)=>a.k.localeCompare(b.k));
+  if(!all.length){ list.innerHTML='<span style="font-size:9px;color:var(--faint)">No custom entries yet.</span>'; return; }
+  all.forEach(({k,v,cat})=>{
+    const [y,m,d]=k.split('-').map(Number);
+    const chip=document.createElement('div'); chip.className=`chip cc-${cat}`;
+    chip.innerHTML=`<span>${cat==='oncall'?'Wk ':'' }${fmtDt(y,m,d)}${v.n?' · '+v.n:''}</span><button class="del-btn">×</button>`;
+    chip.querySelector('.del-btn').onclick=()=>doDelete(k,cat);
+    list.appendChild(chip);
+  });
+}
+
+function doAdd() {
+  const d1=document.getElementById('d1')?.value;
+  const d2=document.getElementById('d2')?.value;
+  const lbl=document.getElementById('entry-label')?.value.trim();
+  if(!d1) return;
+  const start=parseDin(d1); if(!start) return;
+
+  if(pMode==='oncall') {
+    UD.oncall[getWeekMon(start.y,start.m,start.d)]={n:lbl||'On-call'};
+  } else {
+    const end=pMode==='range'&&d2?parseDin(d2):start;
+    const abbr=lbl?lbl.slice(0,4).toUpperCase():(pCat==='conf'?'CONF':pCat==='embargo'?'EMB':'V');
+    iterDates(start,end,(y,m,d)=>{
+      const k=dkey(y,m,d), entry={a:abbr,n:lbl||''};
+      if(pCat==='pto'||pCat==='closed') UD.closed[k]=entry;
+      else if(pCat==='conf')    UD.conf[k]=entry;
+      else if(pCat==='embargo') UD.embargo[k]=entry;
+    });
+  }
+  saveUD(); reRender();
+}
+
+function doDelete(k,cat) {
+  if(cat==='pto')          delete UD.closed[k];
+  else if(cat==='conf')    delete UD.conf[k];
+  else if(cat==='embargo') delete UD.embargo[k];
+  else if(cat==='oncall')  delete UD.oncall[k];
+  saveUD(); reRender();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════════════════════════════════
+function buildPage(slice, title, sub, year) {
+  const page=document.createElement('div'); page.className='page'; page.id=`page-${year}-${title.replace(/\s/g,'')}`;
+  const hdr=document.createElement('div'); hdr.className='page-hdr';
+  hdr.innerHTML=`<span class="page-title">${title}</span><span class="page-sub">${sub}</span>`;
+  page.appendChild(hdr);
+  page.appendChild(buildCbar(year));
+  const grid=document.createElement('div'); grid.className='months-grid';
+  slice.forEach(({y,m})=>grid.appendChild(buildMonth(y,m)));
+  page.appendChild(grid);
+  page.appendChild(buildLegend());
+  return page;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TARGETED DOM UPDATES (avoid full reRender on popup apply)
+// ═══════════════════════════════════════════════════════════════════
+function updateCell(key) {
+  document.querySelectorAll(`[data-key="${key}"]`).forEach(cellEl => {
+    const [y,m,d]=key.split('-').map(Number);
+    const dow=new Date(y,m,d).getDay(), isWe=dow===0||dow===6;
+    const monK=getWeekMon(y,m,d), inOC=!!UD.oncall[monK];
+    const base=CLOSED_BASE[key],uClosed=UD.closed[key];
+    const uConf=UD.conf[key]||CONF_BASE[key],uEmb=UD.embargo[key];
+    let cls='dc';
+    if(isWe) cls+=' we';
+    if(key===todayKey) cls+=' today';
+    if(inOC) cls+=' in-oncall';
+    let tag=null;
+    if(uEmb)               {cls+=' d-embargo';tag=uEmb;}
+    else if(base||uClosed) {cls+=' d-closed'; tag=base||uClosed;}
+    else if(uConf)         {cls+=' d-conf';   tag=uConf;}
+    else if(inOC)          {cls+=' d-oncall';}
+    cellEl.className=cls;
+    cellEl.dataset.key=key;
+    // Re-add click listener (class replacement loses it)
+    cellEl.onclick=e=>{e.stopPropagation();showPopup(key,cellEl);};
+    const ab=cellEl.querySelector('.d-abbr'); if(ab) ab.remove();
+    if(tag&&tag.a){const el=document.createElement('span');el.className='d-abbr';el.textContent=tag.a;cellEl.appendChild(el);}
+  });
+}
+
+function updateWeek(monKey) {
+  const [my,mm,md]=monKey.split('-').map(Number);
+  for(let i=0;i<7;i++){
+    const s=new Date(my,mm,md+i);
+    updateCell(dkey(s.getFullYear(),s.getMonth(),s.getDate()));
+  }
+}
+
+function refreshCbars() {
+  YEARS.forEach(yr=>{
+    document.querySelectorAll(`.cbar-y${yr}`).forEach(old=>{
+      const nb=buildCbar(yr); old.parentNode.replaceChild(nb,old);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DAY POPUP
+// ═══════════════════════════════════════════════════════════════════
+let popKey=null, popCat=null;
+const DNAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function createPopup() {
+  if(document.getElementById('dp')) return;
+  const dp=document.createElement('div'); dp.id='dp'; dp.className='hidden';
+  dp.innerHTML=`
+    <div class="dp-hd">
+      <span class="dp-date" id="dp-dt"></span>
+      <button class="dp-x" id="dp-x">×</button>
+    </div>
+    <div class="dp-base-info hidden" id="dp-base"></div>
+    <div class="dp-cats" id="dp-cats"></div>
+    <div class="dp-lbl-wrap"><input class="dp-lbl-in" id="dp-lbl" placeholder="Label (opt.)"></div>
+    <div class="dp-btns">
+      <button class="dp-apply" id="dp-apply">Apply</button>
+      <button class="dp-rm hidden" id="dp-rm">Remove</button>
+    </div>`;
+  document.body.appendChild(dp);
+  document.getElementById('dp-x').onclick=hidePopup;
+  document.getElementById('dp-apply').onclick=applyPopup;
+  document.getElementById('dp-rm').onclick=removeEntry;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hidePopup();});
+  document.addEventListener('click',e=>{if(dp&&!dp.contains(e.target))hidePopup();});
+}
+
+function showPopup(key, cellEl) {
+  popKey=key;
+  const [y,m,d]=key.split('-').map(Number);
+  const dt=new Date(y,m,d);
+  document.getElementById('dp-dt').textContent=`${DNAMES[dt.getDay()]} ${d} ${MN[m]} ${y}`;
+
+  // Jaarkalender base info
+  const base=CLOSED_BASE[key]||CONF_BASE[key];
+  const baseEl=document.getElementById('dp-base');
+  if(base&&base.n){ baseEl.textContent=(base.a?base.a+' · ':'')+base.n; baseEl.className='dp-base-info'; }
+  else { baseEl.className='dp-base-info hidden'; }
+
+  // Detect current user entry
+  const monK=getWeekMon(y,m,d);
+  if(UD.embargo[key])    popCat='embargo';
+  else if(UD.closed[key]) popCat='pto';
+  else if(UD.conf[key])   popCat='conf';
+  else if(UD.oncall[monK]) popCat='oncall';
+  else popCat=null;
+
+  // Pre-fill label
+  const cur=UD.embargo[key]||UD.closed[key]||UD.conf[key]||(UD.oncall[monK]);
+  document.getElementById('dp-lbl').value=cur&&cur.n?cur.n:'';
+
+  // Build category pills
+  const catsEl=document.getElementById('dp-cats'); catsEl.innerHTML='';
+  [{id:'pto',lbl:'PTO'},{id:'conf',lbl:'Conference'},{id:'embargo',lbl:'Embargo'},{id:'oncall',lbl:'On-call week'}]
+  .forEach(({id,lbl})=>{
+    const b=document.createElement('button');
+    b.className=`dp-pill pp-${id}`+(popCat===id?' on':'');
+    b.textContent=lbl;
+    b.onclick=()=>{popCat=id; catsEl.querySelectorAll('.dp-pill').forEach(p=>p.classList.remove('on')); b.classList.add('on');};
+    catsEl.appendChild(b);
+  });
+
+  // Show remove only if user has an entry
+  const hasEntry=UD.embargo[key]||UD.closed[key]||UD.conf[key]||UD.oncall[monK];
+  document.getElementById('dp-rm').className='dp-rm'+(hasEntry?'':' hidden');
+
+  // Position near cell
+  const dp=document.getElementById('dp'); dp.className='';
+  const cr=cellEl.getBoundingClientRect();
+  const pw=220,ph=230,vw=window.innerWidth,vh=window.innerHeight;
+  let left=cr.right+8; if(left+pw>vw-8) left=cr.left-pw-8; if(left<8) left=8;
+  let top=cr.top-10;   if(top+ph>vh-8)  top=vh-ph-8;       if(top<8)  top=8;
+  dp.style.left=left+'px'; dp.style.top=top+'px';
+}
+
+function hidePopup() {
+  const dp=document.getElementById('dp'); if(dp) dp.className='hidden';
+  popKey=null; popCat=null;
+}
+
+function applyPopup() {
+  if(!popKey||!popCat){hidePopup();return;}
+  const [y,m,d]=popKey.split('-').map(Number);
+  const lbl=document.getElementById('dp-lbl').value.trim();
+  const abbr=lbl?lbl.slice(0,4).toUpperCase():(popCat==='conf'?'CONF':popCat==='embargo'?'EMB':'V');
+  const entry={a:abbr,n:lbl};
+  const monK=getWeekMon(y,m,d);
+
+  // Clear existing user entries for this key
+  delete UD.closed[popKey]; delete UD.conf[popKey]; delete UD.embargo[popKey];
+
+  if(popCat==='oncall') {
+    UD.oncall[monK]={n:lbl||'On-call'};
+    saveUD(); updateWeek(monK);
+  } else {
+    if(popCat==='pto')      UD.closed[popKey]=entry;
+    else if(popCat==='conf')    UD.conf[popKey]=entry;
+    else if(popCat==='embargo') UD.embargo[popKey]=entry;
+    saveUD(); updateCell(popKey);
+  }
+  refreshCbars(); buildPanel(); hidePopup();
+}
+
+function removeEntry() {
+  if(!popKey) return;
+  const [y,m,d]=popKey.split('-').map(Number);
+  const monK=getWeekMon(y,m,d);
+  const hadOC=!!UD.oncall[monK];
+  delete UD.closed[popKey]; delete UD.conf[popKey]; delete UD.embargo[popKey];
+  if(hadOC){ delete UD.oncall[monK]; saveUD(); updateWeek(monK); }
+  else { saveUD(); updateCell(popKey); }
+  refreshCbars(); buildPanel(); hidePopup();
+}
+
+function reRender() {
+  const root=document.getElementById('cal-root'); root.innerHTML='';
+  const totalPages = YEARS.length * 2;
+  let pageNum = 0;
+  YEARS.forEach((year, i) => {
+    const idx = i * 12;
+    pageNum++;
+    root.appendChild(buildPage(MONTHS_LIST.slice(idx, idx+6), `January – June ${year}`, `Belgian workplace calendar · page ${pageNum} of ${totalPages}`, year));
+    pageNum++;
+    root.appendChild(buildPage(MONTHS_LIST.slice(idx+6, idx+12), `July – December ${year}`, `Belgian workplace calendar · page ${pageNum} of ${totalPages}`, year));
+  });
+  buildPanel();
+}
+
+async function init() { await loadUD(); reRender(); createPopup(); }
+init();
+</script>
+</body>
+</html>
